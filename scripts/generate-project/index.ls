@@ -26,4 +26,5 @@ dir |> (n) -> join(n, 'src') |> mkdirp
 \main.ts.t |> cmd |> read-as-utf8 |> (body) -> write join(dir, 'src', 'main.ts'), body
 \vertex.wgsl.t |> cmd |> read-as-utf8 |> (body) -> write join(dir, 'src', 'vertex.wgsl'), body
 \fragment.wgsl.t |> cmd |> read-as-utf8 |> (body) -> write join(dir, 'src', 'fragment.wgsl'), body
+\type.d.ts.t |> cmd |> read-as-utf8 |> (body) -> write join(dir, 'src', 'type.d.ts'), body
 console.log "npm i -D typescript @webgpu/types vite"
