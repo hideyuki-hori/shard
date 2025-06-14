@@ -1,23 +1,27 @@
-import { Effect } from 'effect'
+import { Effect, pipe } from 'effect'
 import { WebGPUAdapterNotAvailable, WebGPUContextNotAvailable } from '~/errors'
 
-export function prepareWebGPU(canvas: HTMLCanvasElement) {
-  return Effect.promise(() => navigator.gpu.requestAdapter()).pipe(
-    Effect.flatMap((adapter) =>
-      adapter
-        ? Effect.succeed(adapter)
-        : Effect.fail(new WebGPUAdapterNotAvailable())
-    ),
-    Effect.flatMap((adapter) =>
-      Effect.promise(() => adapter.requestDevice()).pipe(
-        Effect.map((device) => ({ adapter, device }))
-      )
-    ),
-    Effect.flatMap(({ adapter, device }) => {
-      const context = canvas.getContext('webgpu')
-      return context
-        ? Effect.succeed({ adapter, device, context })
-        : Effect.fail(new WebGPUContextNotAvailable())
-    })
-  )
-}
+const ensureAdapter = () => pipe(
+  Effect.promise(() => navigator.gpu.requestAdapter()),
+  Effect.flatMap(Effect.fromNullable),
+  Effect.orElseFail(() => new WebGPUAdapterNotAvailable()),
+)
+
+const ensureDevice = (adapter: GPUAdapter) => Effect.promise(() => adapter.requestDevice())
+
+const ensureContext = (canvas: HTMLCanvasElement) => pipe(
+  Effect.sync(() => canvas.getContext('webgpu')),
+  Effect.flatMap(Effect.fromNullable),
+  Effect.orElseFail(() => new WebGPUContextNotAvailable()),
+)
+
+export const prepareWebGPU = (canvas: HTMLCanvasElement) => Effect.gen(function* (_) {
+  const adapter = yield* _(ensureAdapter())
+  const device = yield* _(ensureDevice(adapter))
+  const context = yield* _(ensureContext(canvas))
+  return {
+    adapter,
+    device,
+    context,
+  }
+})
