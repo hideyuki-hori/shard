@@ -45,7 +45,6 @@ describe('prepareWebGPU', () => {
       } as unknown as HTMLCanvasElement
 
       const exit = yield* Effect.exit(prepareWebGPU(canvas))
-      expect(Exit.isSuccess(exit)).toBe(true)
       assert(Exit.isSuccess(exit), 'Expected Exit to be success')
       expect(exit.value.adapter).toBe(mockAdapter)
       expect(exit.value.device).toEqual({ id: 'mock-device' })
@@ -69,7 +68,6 @@ describe('prepareWebGPU', () => {
       } as unknown as HTMLCanvasElement
 
       const exit = yield* Effect.exit(prepareWebGPU(canvas))
-      expect(Exit.isFailure(exit)).toBe(true)
       assert(Exit.isFailure(exit), 'Expected Exit to be failure')
       const failure = Cause.failureOption(exit.cause)
       assert(Option.isSome(failure), 'Expected failure to be present')
@@ -84,7 +82,6 @@ describe('prepareWebGPU', () => {
       } as unknown as HTMLCanvasElement
 
       const exit = yield* Effect.exit(prepareWebGPU(canvas))
-      expect(Exit.isFailure(exit)).toBe(true)
       assert(Exit.isFailure(exit), 'Expected Exit to be failure')
 
       const failure = Cause.failureOption(exit.cause)
